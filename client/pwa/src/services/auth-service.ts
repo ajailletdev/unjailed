@@ -1,4 +1,3 @@
-import { config } from '@/config/config';
 import { User } from '@/entities/user.entity';
 import router from '@/router';
 import axios from 'axios';
@@ -19,7 +18,7 @@ class AuthService {
 
     public async onLogin(login: string, password: string): Promise<void> {
         try {
-            const res = await axios.post(`${config.local}/auth/login`, {
+            const res = await axios.post(`api/auth/login`, {
                 username: login,
                 password
             });

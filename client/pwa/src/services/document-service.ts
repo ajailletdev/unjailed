@@ -1,4 +1,3 @@
-import { config } from '../config/config';
 import { Document } from '../entities/document.entity';
 import axios from 'axios';
 
@@ -10,7 +9,7 @@ class DocumentService {
 
     public async deleteDocument (id: string): Promise<Document | undefined> {
         try {
-            const res = await axios.delete(`${config.local}/document/${id}`);
+            const res = await axios.delete(`api/document/${id}`);
             return res.data as Document;
         }
         catch (_) {
@@ -20,7 +19,7 @@ class DocumentService {
 
     public async findAllDocuments (): Promise<Document[] | undefined> {
         try {
-            const res = await axios.get(`${config.local}/document`);
+            const res = await axios.get(`api/document`);
             return res.data.map((doc: Document) => {
                 return new Document(doc);
             });
@@ -38,7 +37,7 @@ class DocumentService {
                 formData.append('file', doc);
             });
 
-            const response = await axios.post(`${config.local}/document/upload`,
+            const response = await axios.post(`api/document/upload`,
                 formData
             );
 
