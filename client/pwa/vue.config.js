@@ -5,7 +5,7 @@ module.exports = {
   devServer: {
     proxy: {
       '^/api': {
-        target: process.env.SERVER_ADRESS,
+        target: process.env.NEXT_PUBLIC_SERVER_ADRESS,
         changeOrigin: true,
         pathRewrite: {'^/api': ''},
         logLevel: 'debug' 
