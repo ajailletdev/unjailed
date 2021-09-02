@@ -5,7 +5,11 @@
         dark
     >
       <v-spacer></v-spacer>
-      <v-app-bar-nav-icon @click="loginLogout"></v-app-bar-nav-icon>
+      <v-btn icon @click="loginLogout">
+        <v-icon>
+          mdi-login
+        </v-icon>
+      </v-btn>
 
       <template v-slot:extension>
         <v-tabs
