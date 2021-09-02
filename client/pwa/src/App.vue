@@ -4,6 +4,7 @@
         color="warn"
         dark
     >
+      Bienvenue
       <v-spacer></v-spacer>
       <v-btn icon @click="loginLogout">
         <v-icon>
