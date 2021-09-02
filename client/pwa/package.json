@@ -24,7 +24,6 @@
     "vuetify": "^2.5.8"
   },
   "devDependencies": {
-    "@types/vue-material": "github:calebsander/vue-material-types",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",
