@@ -18,7 +18,6 @@ class AuthService {
 
     public async onLogin(login: string, password: string): Promise<void> {
         try {
-            console.log('ouiiii', process.env.VUE_APP_BACKEND_URL);
             const res = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/auth/login`, {
                 username: login,
                 password
