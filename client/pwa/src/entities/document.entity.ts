@@ -22,7 +22,7 @@ export class Document {
 
 
     public async getPreview(): Promise<File> {
-        const res = await axios.get(`api/${this.apiName}/preview/${this.id}`,{
+        const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/${this.apiName}/preview/${this.id}`,{
           responseType: 'blob'
         });
         const file = new File([ res.data ], this.originalName, { type: this.mime });
@@ -35,7 +35,7 @@ export class Document {
     }
 
     public async changeFilename(name: string): Promise<void> {
-      const res = await axios.patch(`api/${this.apiName}/${this.id}/filename/${name}`);
+      const res = await axios.patch(`${process.env.VUE_APP_BACKEND_URL}/${this.apiName}/${this.id}/filename/${name}`);
       this.originalName = res.data.originalName;
     }
 }

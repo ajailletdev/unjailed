@@ -9,7 +9,7 @@ class DocumentService {
 
     public async deleteDocument (id: string): Promise<Document | undefined> {
         try {
-            const res = await axios.delete(`api/document/${id}`);
+            const res = await axios.delete(`${process.env.VUE_APP_BACKEND_URL}/document/${id}`);
             return res.data as Document;
         }
         catch (_) {
@@ -19,7 +19,7 @@ class DocumentService {
 
     public async findAllDocuments (): Promise<Document[] | undefined> {
         try {
-            const res = await axios.get(`api/document`);
+            const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/document`);
             return res.data.map((doc: Document) => {
                 return new Document(doc);
             });
@@ -37,7 +37,7 @@ class DocumentService {
                 formData.append('file', doc);
             });
 
-            const response = await axios.post(`api/document/upload`,
+            const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/document/upload`,
                 formData
             );
 

@@ -1,3 +1,4 @@
+ /* eslint-disable */
 import authService from '../services/auth-service';
 
 export function tokenResponseInterceptor(response: any) {
