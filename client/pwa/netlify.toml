@@ -1,0 +1,2 @@
+[build.environment]
+    VUE_APP_BACKEND_URL = "http://localhost:3000"
