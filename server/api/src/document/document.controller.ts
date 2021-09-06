@@ -1,9 +1,10 @@
-import { Controller, Delete, Get, Param, Patch, Post, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Post, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { Document } from './document.entity';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { DocumentStorageService } from './document-storage.service';
 import { PassThrough } from 'stream';
+import { OwnerGuard } from 'src/decorator/owner.guard';
 
 @Controller('document')
 export class DocumentController {
@@ -47,9 +48,22 @@ export class DocumentController {
         return await this.documentService.findAll(userId);
     }
 
+    @UseGuards(OwnerGuard)
     @Patch(':id/filename/:name')
     async editFilename(@Param('id') id: string, @Param('name') name: string): Promise<Document> {
       return await this.documentService.editFilename(id, name);
+    }
+
+    @UseGuards(OwnerGuard)
+    @Patch(':id/addViewer/:userId')
+    async addViewer(@Param('id') id: string, @Param('userId') userId: string): Promise<Document> {
+      return await this.documentService.addAViewer(id, userId);
+    }
+
+    @UseGuards(OwnerGuard)
+    @Patch(':id/removeViewer/:userId')
+    async removeViewer(@Param('id') id: string, @Param('userId') userId: string): Promise<Document> {
+      return await this.documentService.removeAViewer(id, userId);
     }
 
     @Post('upload/:ownerId')
@@ -58,6 +72,7 @@ export class DocumentController {
         return await this.documentService.bulkAddFiles(files, ownerId);
     }
     
+    @UseGuards(OwnerGuard)
     @Delete(':id')
     async remove(@Param('id') id: string): Promise<Document> {
       return await this.documentService.deleteADocument(id);

@@ -11,7 +11,9 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { User } from './user/user.entity';
+import { AccessRightModule } from './access-right/access-right.module';
 import configuration from './config/configuration';
+import { AccessRight } from './access-right/access_right.entity';
 
 
 @Module({
@@ -29,7 +31,7 @@ import configuration from './config/configuration';
         password: configService.get('db.password'),
         database: configService.get('db.database'),
         synchronize: configService.get('db.synchronize'),
-        entities: [Document, User],
+        entities: [Document, User, AccessRight],
       }),
       inject: [ConfigService],
     }),
@@ -40,6 +42,7 @@ import configuration from './config/configuration';
     DocumentModule,
     UserModule,
     AuthModule,
+    AccessRightModule,
   ],
   controllers: [AppController],
   providers: [

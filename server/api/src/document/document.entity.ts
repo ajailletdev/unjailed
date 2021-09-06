@@ -1,5 +1,6 @@
+import { AccessRight } from 'src/access-right/access_right.entity';
 import { User } from 'src/user/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class Document {
@@ -36,4 +37,7 @@ export class Document {
 
   @Column({ nullable: false })
   ownerId: string;
+
+  @OneToMany(type => AccessRight, (acc) => acc.document)
+  viewers?: AccessRight[];
 }
