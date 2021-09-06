@@ -13,11 +13,6 @@ export class DocumentController {
         private readonly documentStorageService: DocumentStorageService,
     ) { }
 
-   @Get()
-    public async findAll (): Promise<Document[]> {
-        return await this.documentService.findAll();
-    }
-
     @Get('preview/:id')
     async seeUploadedFile(@Param('id') id: string, @Res() res) {
       const document = await this.documentService.findOne(id);
@@ -47,15 +42,20 @@ export class DocumentController {
       readStream.end();
     }
 
+    @Get('/:userId')
+    public async findAll (@Param('userId') userId: string): Promise<Document[]> {
+        return await this.documentService.findAll(userId);
+    }
+
     @Patch(':id/filename/:name')
     async editFilename(@Param('id') id: string, @Param('name') name: string): Promise<Document> {
       return await this.documentService.editFilename(id, name);
     }
 
-    @Post('upload')
+    @Post('upload/:ownerId')
     @UseInterceptors(FilesInterceptor('file', 50))
-    async uploadFile(@UploadedFiles() files: Express.Multer.File[]): Promise<Document[]> {
-        return await this.documentService.bulkAddFiles(files);
+    async uploadFile(@UploadedFiles() files: Express.Multer.File[], @Param('ownerId') ownerId: string): Promise<Document[]> {
+        return await this.documentService.bulkAddFiles(files, ownerId);
     }
     
     @Delete(':id')

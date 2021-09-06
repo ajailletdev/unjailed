@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { User } from 'src/user/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Document {
@@ -10,6 +11,7 @@ export class Document {
       this.mime = doc.mime;
       this.size = doc.size;
       this.createdAt = doc.createdAt;
+      this.ownerId = doc.ownerId;
     }
   }
 
@@ -27,4 +29,11 @@ export class Document {
 
   @Column()
   size: number;
+
+  @ManyToOne(type => User, user => user.ownedDocuments)
+  @JoinColumn({ name: "ownerId" })
+  owner?: User;
+
+  @Column({ nullable: false })
+  ownerId: string;
 }

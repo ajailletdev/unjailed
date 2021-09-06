@@ -12,19 +12,20 @@ export class DocumentService {
         private documentStorageService: DocumentStorageService,
     ) { }
 
-    public async bulkAddFiles(docs: Express.Multer.File[]): Promise<Document[]> {
+    public async bulkAddFiles(docs: Express.Multer.File[], ownerId: string): Promise<Document[]> {
         const documents = [];
         await Promise.all(docs.map(async (doc) => {
-            documents.push(await this.addOne(doc));
+            documents.push(await this.addOne(doc, ownerId));
         }));
         return documents;
     }
 
-    public async addOne(doc: Express.Multer.File): Promise<Document> {
+    public async addOne(doc: Express.Multer.File, ownerId: string): Promise<Document> {
         const document = new Document({
             originalName: doc.originalname,
             mime: doc.mimetype,
-            size: doc.size
+            size: doc.size,
+            ownerId
         });
         try {
             const addedDoc = await this.documentsRepository.save(document);
@@ -58,8 +59,9 @@ export class DocumentService {
         }
     }
 
-    public async findAll(): Promise<Document[]> {
-        return await this.documentsRepository.find({ order: { createdAt: 'DESC' }});
+    public async findAll(userId: string): Promise<Document[]> {
+        const docs = await this.documentsRepository.find({ where: { ownerId: userId } ,order: { createdAt: 'DESC' }});
+        return docs;
     }
 
     public async findOne(id: string): Promise<Document> {

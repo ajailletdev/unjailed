@@ -13,4 +13,8 @@ export class UserService {
   async findOne(username: string): Promise<User | undefined> {
     return this.userRepository.findOne({select: ['login', 'password'] ,where: {login: username}})
   }
+
+  async findByUserName(username: string): Promise<User | undefined> {
+    return this.userRepository.findOne({select: ['id', 'login'] ,where: {login: username}})
+  }
 }

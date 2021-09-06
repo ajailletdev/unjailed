@@ -2,7 +2,6 @@ import { User } from '@/entities/user.entity';
 import router from '@/router';
 import axios from 'axios';
 import { Subject } from 'rxjs';
-import VueJwtDecode from "vue-jwt-decode";
 
 
 class AuthService {
@@ -10,6 +9,10 @@ class AuthService {
     private jwtToken: string | null = null;
     private user: User | null = null;
     public userSubject: Subject<User | null> = new Subject();
+
+    public constructor () {
+        this.setUserToken();
+    }
 
     public emitUser(): void {
         this.userSubject.next(this.user);
@@ -22,29 +25,50 @@ class AuthService {
                 username: login,
                 password
             });
-            this.jwtToken = res.data.access_token;
-            this.user = VueJwtDecode.decode(this.jwtToken);
-            this.emitUser();
+            localStorage.setItem('jwtToken', res.data.access_token);
+            localStorage.setItem('login', res.data.user.login);
+            await this.setUserToken();
             router.push('/documents');
         }
         catch (err) {
             this.jwtToken = null;
-            axios.defaults.headers.common['Authorization'] = this.jwtToken;
             this.user = null;
             this.emitUser();
         }
         
     }
 
-    public logout (): void {
-        this.jwtToken = null;
-        this.user = null;
-        this.emitUser();
+    public async logout (): Promise<void> {
+        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('login');
+        await this.setUserToken()
         router.push('login');
     }
 
     public getJwtToken(): string | null {
         return this.jwtToken;
+    }
+
+    private async setUserToken () {
+        const login = localStorage.getItem('login');
+        this.jwtToken = localStorage.getItem('jwtToken');
+
+        if (login !== null) {
+            try {
+                const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/user/${login}`, {
+                    headers: {
+                        'Authorization': `Bearer ${this.jwtToken}`,
+                    }
+                });
+                this.user = res.data;
+            }
+            catch (err) {
+                this.user = null;
+            }
+        } else {
+            this.user = null;
+        }
+        this.emitUser();
     }
 }
 

@@ -6,7 +6,7 @@
 
         <v-divider></v-divider>
 
-        <v-card-text v-if="document !== null">
+        <v-card-text v-if="document">
           <div>
           <v-form v-model="filenameValid">
               <v-container>
@@ -91,6 +91,7 @@ import documentService from "../../services/document-service";
 import dateService from "../../services/date-service";
 import { Document } from "../../entities/document.entity"
 import ConfirmDialog from '../shared/ConfirmDialog.vue';
+import { Subscription } from "rxjs";
 
 @Component({
   name: 'DocumentDetails',
@@ -99,7 +100,7 @@ import ConfirmDialog from '../shared/ConfirmDialog.vue';
   }
 })
 export default class DocumentDetails extends Vue {
-
+  
   public document: Document | null = null;
   public editableFilename = "";
   public confirmDialog = false;
@@ -108,7 +109,7 @@ export default class DocumentDetails extends Vue {
     // eslint-disable-next-line
     (v: any) => !!v || 'Name is required'
   ]
-  
+
   changingCurrentDoc(): void {
     this.document = documentService.getCurrentDocument();
     if (this.document !== null) this.editableFilename = this.document.originalName;
@@ -118,8 +119,8 @@ export default class DocumentDetails extends Vue {
     return dateService.convertToFrLocale(date);
   }
  
-  closeDialog(deleted?: string): void {
-    this.$emit('close-dialog', deleted);
+  closeDialog(): void {
+    this.$emit('close-dialog');
   }
 
   async saveFilenameDocument(): Promise<void> {
@@ -132,9 +133,8 @@ export default class DocumentDetails extends Vue {
   async closeConfirmDialog(res: { valid: boolean }): Promise<void> {
     if (res.valid && this.document && this.document.id) {
       this.confirmDialog = false;
-      const deletedDoc = await documentService.deleteDocument(this.document.id);
-      if (deletedDoc)
-        this.closeDialog(this.document.id);
+      await documentService.deleteDocument(this.document.id);
+      this.closeDialog();
     }
     else this.confirmDialog = false;
   }
