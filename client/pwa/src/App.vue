@@ -4,7 +4,9 @@
         color="warn"
         dark
     >
-      Bienvenue
+      <h4 v-if="users[0]">
+        {{users[0].login}}
+      </h4>
       <v-spacer></v-spacer>
       <v-btn icon @click="loginLogout">
         <v-icon>
@@ -40,10 +42,16 @@ export default class App extends Vue {
 
   public user: User | null = null;
 
+  public users: User[] = [];
+
   constructor () {
     super();
     authService.userSubject.subscribe((user) => {
+      while (this.users.length > 0) {
+        this.users.pop();
+      }
       this.user = user;
+      this.users.push(user);
     });
   }
 

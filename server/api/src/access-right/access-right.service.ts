@@ -15,7 +15,11 @@ export class AccessRightService {
         return await this.accessRightsRepository.save(accessRight);
     }
 
-    public async removeOne (accessRight: AccessRight): Promise<AccessRight> {
-        return await this.accessRightsRepository.remove(accessRight);
+    public async removeOne (documentId: string, userId: string): Promise<AccessRight> {
+        const acc = await this.accessRightsRepository.findOne({ where: {
+            documentId,
+            userId
+        }});
+        return await this.accessRightsRepository.remove(acc);
     }
 }

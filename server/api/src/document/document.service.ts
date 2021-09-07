@@ -65,14 +65,21 @@ export class DocumentService {
     }
 
     public async findAll(userId: string): Promise<Document[]> {
-        const docs = await this.documentsRepository.find({ where: { ownerId: userId } ,order: { createdAt: 'DESC' }});
+        const docs = await this.documentsRepository.createQueryBuilder('doc')
+            .where('doc.ownerId = :userId', { userId })
+            .leftJoinAndSelect('doc.viewers', 'acc')
+            .leftJoinAndSelect('acc.user', 'user')
+            .getMany();
+
         return docs;
     }
 
     public async findOne(id: string): Promise<Document> {
-        return await this.documentsRepository.findOne(id, {
-            relations: ['owner', 'viewers']
-        });
+        return await this.documentsRepository.createQueryBuilder('doc')
+            .where('doc.id = :id', { id })
+            .leftJoinAndSelect('doc.viewers', 'acc')
+            .leftJoinAndSelect('acc.user', 'user')
+            .getOne();
     }
 
     public async remove(id: string): Promise<void> {
@@ -101,7 +108,7 @@ export class DocumentService {
             if (!doc) {
                 throw new NotFoundException('Document not found');
             }
-            await this.accessRightService.removeOne({documentId: id, userId});
+            await this.accessRightService.removeOne(id, userId);
 
             return await this.findOne(id);
         }

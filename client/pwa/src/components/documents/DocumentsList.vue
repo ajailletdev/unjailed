@@ -13,6 +13,12 @@
             <v-card-text class="doc-card-text">
                 {{doc.size/1000}} Ko
             </v-card-text>
+            <v-card-text>
+                Accès:
+                <span v-for="acc of doc.viewers" v-bind:key="acc.id">
+                    {{ acc.user.login }}
+                </span>
+            </v-card-text>
             <v-card-actions>
                 <v-btn
                 icon

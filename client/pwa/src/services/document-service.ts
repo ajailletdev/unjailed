@@ -45,6 +45,10 @@ class DocumentService {
         this.emitCurrentDocument();
     }
 
+    public getCurrentDocument(): Document | null {
+        return this.currentDocument;
+    }
+
 
     public async deleteDocument (id: string): Promise<Document | undefined> {
         try {
@@ -60,7 +64,7 @@ class DocumentService {
     public async findAllDocuments (): Promise<Document[]> {
         if (this.user?.id) {
             try {
-                const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/document/${this.user.id}`);
+                const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/document/user/${this.user.id}`);
                 return res.data.map((doc: Document) => {
                     return new Document(doc);
                 });
@@ -69,6 +73,16 @@ class DocumentService {
                 console.error(_);
             }
         } else return [];
+    }
+
+    public async findOne (docId: string): Promise<Document> {
+        try {
+            const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/document/${docId}`);
+            return new Document(res.data as Document);
+        }
+        catch (_) {
+            console.error(_);
+        }
     }
 
 
@@ -98,9 +112,14 @@ class DocumentService {
         }
     }
 
-
-    public getCurrentDocument(): Document | null {
-        return this.currentDocument;
+    public async manageCurrentDocumentViewer (user: User) {
+        const index = this.currentDocument.viewers.findIndex((acc) => {
+            return acc.userId === user.id
+        });
+        if (index === -1) {
+            await this.currentDocument.addViewer(user);
+        }
+        else await this.currentDocument.removeViewer(user);
     }
 }
 

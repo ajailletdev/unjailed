@@ -2,6 +2,17 @@
   <v-card>
         <v-card-title class="primary">
           Modification d'un document
+          <v-spacer></v-spacer>
+          <v-btn
+            color="accent"
+            fab
+            small
+            @click="closeDialog()"
+          >
+          <v-icon>
+            mdi-close
+          </v-icon>
+          </v-btn>
         </v-card-title>
 
         <v-divider></v-divider>
@@ -39,7 +50,32 @@
               </div>
             </div>
             <div style="flex: 1; display: flex; justify-content: flex-end; align-items: flex-end">
-              <v-dialog
+              <v-btn
+                color="primary"
+                fab
+                small
+                @click="openEditViewersDialog"        
+              >
+              <v-icon>
+                mdi-account-multiple-plus
+              </v-icon>
+              </v-btn>
+            </div>
+          </div>
+        </v-card-text>
+
+        <v-dialog
+          ref="editDocumentViewers"
+          width="300"
+          v-model="editDocumentViewers"
+          v-on:close-dialog="closeEditViewersDialog"
+        >
+          <edit-document-viewers
+          v-on:close-dialog="closeEditViewersDialog"/>
+        </v-dialog>
+
+        <v-card-actions>
+          <v-dialog
                 width="500"
                 v-model="confirmDialog"
             >
@@ -57,20 +93,7 @@
               </template>
               <confirm-dialog
               v-on:close-dialog="closeConfirmDialog"/>
-              </v-dialog>
-            </div>
-          </div>
-        </v-card-text>
-
-
-        <v-card-actions>
-          <v-btn
-            color="accent"
-            text
-            @click="closeDialog()"
-          >
-            Fermer
-          </v-btn>
+          </v-dialog>
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
@@ -78,7 +101,7 @@
             text
             @click="saveFilenameDocument()"
           >
-            Valider les changements
+          Valider les changements
           </v-btn>
         </v-card-actions>
     </v-card>
@@ -91,12 +114,13 @@ import documentService from "../../services/document-service";
 import dateService from "../../services/date-service";
 import { Document } from "../../entities/document.entity"
 import ConfirmDialog from '../shared/ConfirmDialog.vue';
-import { Subscription } from "rxjs";
+import EditDocumentViewers from './EditDocumentViewers.vue';
 
 @Component({
   name: 'DocumentDetails',
   components: {
-    ConfirmDialog
+    ConfirmDialog,
+    EditDocumentViewers
   }
 })
 export default class DocumentDetails extends Vue {
@@ -105,6 +129,8 @@ export default class DocumentDetails extends Vue {
   public editableFilename = "";
   public confirmDialog = false;
   public filenameValid = false;
+  public editDocumentViewers = false;
+
   public filenameRules = [
     // eslint-disable-next-line
     (v: any) => !!v || 'Name is required'
@@ -137,6 +163,14 @@ export default class DocumentDetails extends Vue {
       this.closeDialog();
     }
     else this.confirmDialog = false;
+  }
+
+  closeEditViewersDialog(): void {
+    this.editDocumentViewers = false;
+  }
+
+  openEditViewersDialog(): void {
+    this.editDocumentViewers = true;
   }
 }
 </script>

@@ -43,9 +43,14 @@ export class DocumentController {
       readStream.end();
     }
 
-    @Get('/:userId')
+    @Get('/user/:userId')
     public async findAll (@Param('userId') userId: string): Promise<Document[]> {
         return await this.documentService.findAll(userId);
+    }
+
+    @Get(':id')
+    public async findOne (@Param('id') id: string): Promise<Document> {
+        return await this.documentService.findOne(id);
     }
 
     @UseGuards(OwnerGuard)

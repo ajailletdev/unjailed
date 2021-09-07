@@ -1,4 +1,6 @@
 import axios from "axios";
+import { AccessRight } from "./access_right.entity";
+import { User } from "./user.entity";
 
 export class Document {
 
@@ -9,6 +11,9 @@ export class Document {
         this.mime = doc.mime;
         this.size = doc.size;
         this.createdAt = doc.createdAt;
+        this.owner = doc.owner;
+        this.ownerId = doc.ownerId;
+        this.viewers = doc.viewers;
       }
     }
   
@@ -17,6 +22,9 @@ export class Document {
     originalName!: string;
     mime!: string;
     size!: number;
+    owner?: User;
+    ownerId: string;
+    viewers: AccessRight[];
 
     apiName = 'document';
 
@@ -37,5 +45,15 @@ export class Document {
     public async changeFilename(name: string): Promise<void> {
       const res = await axios.patch(`${process.env.VUE_APP_BACKEND_URL}/${this.apiName}/${this.id}/filename/${name}`);
       this.originalName = res.data.originalName;
+    }
+
+    public async addViewer(user: User): Promise<void> {
+      const res = await axios.patch(`${process.env.VUE_APP_BACKEND_URL}/${this.apiName}/${this.id}/addViewer/${user.id}`);
+      this.viewers = [...res.data.viewers];
+    }
+
+    public async removeViewer(user: User): Promise<void> {
+      const res = await axios.patch(`${process.env.VUE_APP_BACKEND_URL}/${this.apiName}/${this.id}/removeViewer/${user.id}`);
+      this.viewers = [...res.data.viewers];
     }
 }
