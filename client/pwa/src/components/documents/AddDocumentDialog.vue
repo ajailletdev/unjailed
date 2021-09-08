@@ -62,11 +62,10 @@ export default class AddDocumentDialog extends Vue {
 
   async saveDocument(): Promise<void> {
       this.loading = true;
-      const addedDocs = await documentService.postDocuments(this.files);
+      await documentService.postDocuments(this.files);
+      this.files = [];
       this.loading = false;
-      this.$emit('close-dialog', {
-        addedDocs
-      });
+      this.$emit('close-dialog');
   }
 }
 </script>

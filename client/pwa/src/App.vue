@@ -4,19 +4,22 @@
         color="warn"
         dark
     >
-      Bienvenue
+      <p v-if="users[0]">
+        Bienvenue {{users[0].login}}
+      </p>
       <v-spacer></v-spacer>
-      <v-btn icon @click="loginLogout">
-        <v-icon>
-          mdi-login
-        </v-icon>
+      <v-btn v-if="!users[0]" text @click="loginLogout">
+        Se connecter
+      </v-btn>
+      <v-btn v-if="users[0]" text @click="loginLogout">
+        Se déconnecter
       </v-btn>
 
       <template v-slot:extension>
         <v-tabs
         centered>
           <v-tab to="/home">Home</v-tab>
-          <v-tab to="/documents">Documents</v-tab>
+          <v-tab v-if="users[0]" to="/documents">Documents</v-tab>
         </v-tabs>
       </template>
     </v-app-bar>
@@ -40,10 +43,16 @@ export default class App extends Vue {
 
   public user: User | null = null;
 
+  public users: User[] = [];
+
   constructor () {
     super();
     authService.userSubject.subscribe((user) => {
+      while (this.users.length > 0) {
+        this.users.pop();
+      }
       this.user = user;
+      this.users.push(user);
     });
   }
 

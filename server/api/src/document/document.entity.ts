@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { AccessRight } from 'src/access-right/access_right.entity';
+import { User } from 'src/user/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class Document {
@@ -10,6 +12,7 @@ export class Document {
       this.mime = doc.mime;
       this.size = doc.size;
       this.createdAt = doc.createdAt;
+      this.ownerId = doc.ownerId;
     }
   }
 
@@ -27,4 +30,14 @@ export class Document {
 
   @Column()
   size: number;
+
+  @ManyToOne(type => User, user => user.ownedDocuments)
+  @JoinColumn({ name: "ownerId" })
+  owner?: User;
+
+  @Column({ nullable: false })
+  ownerId: string;
+
+  @OneToMany(type => AccessRight, (acc) => acc.document)
+  viewers?: AccessRight[];
 }

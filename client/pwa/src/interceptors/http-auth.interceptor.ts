@@ -8,6 +8,6 @@ export function tokenResponseInterceptor(response: any) {
 
 
 export function tokenRequestInterceptor(request: any) {
-    request.headers['Authorization'] = `Bearer ${authService.getJwtToken()}`;
+    request.headers['Authorization'] = `Bearer ${localStorage.getItem('jwtToken')}`;
     return request
 }

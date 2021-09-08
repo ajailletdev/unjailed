@@ -13,6 +13,12 @@
             <v-card-text class="doc-card-text">
                 {{doc.size/1000}} Ko
             </v-card-text>
+            <v-card-text>
+                Accès:
+                <span v-for="acc of doc.viewers" v-bind:key="acc.id">
+                    {{ acc.user.login }}
+                </span>
+            </v-card-text>
             <v-card-actions>
                 <v-btn
                 icon
@@ -81,6 +87,7 @@ import AddDocumentDialog from './AddDocumentDialog.vue';
 import DocumentDetails from './DocumentDetails.vue';
 import InputWidget from '../shared/InputWidget.vue';
 import { multiWordFilter } from '../../services/word-service';
+import { Subscription } from "rxjs";
 
 @Component({
   name: 'DocumentsList',
@@ -100,24 +107,26 @@ export default class DocumentsList extends Vue {
 
     public filterWord: string | null = null;
 
-    public mounted(): void {
-        this.setAllDocuments();
+    private allDocuments$: Subscription;
+
+    constructor () {
+      super();
+        this.allDocuments$ = documentService.documentsSubject.subscribe((docs) => {
+            this.allDocuments = docs;
+            this.setUpDocuments(this.allDocuments);
+        });
     }
 
-    public async setAllDocuments(): Promise<void> {
-        const docs = await documentService.findAllDocuments();
-        if (docs) {
-            this.allDocuments = docs;
-            this.setUpDocuments();
-        }
+    public async mounted(): Promise<void> {
+        await documentService.initAllDocument();
+    }
+
+    public destroyed(): void {
+      this.allDocuments$.unsubscribe();
     }
 
     // eslint-disable-next-line 
-    public closeAddDialog (res?: any): void {
-        if (res?.addedDocs) {
-            this.allDocuments.unshift(...res.addedDocs);
-            this.setUpDocuments();
-        }         
+    public closeAddDialog (): void {    
         this.addDialog = false;
     }
 
@@ -146,27 +155,23 @@ export default class DocumentsList extends Vue {
         }
     }
 
-    public closeEditDialog (res?:  string): void {  
+    public closeEditDialog (): void {  
         documentService.setCurrentDocument(null);
-        if (res) {
-            this.allDocuments = this.allDocuments.filter((doc) => doc.id !== res);
-            this.setUpDocuments();
-        }
         this.editDialog = false;
     }
 
     public filterDocuments(res: { value: string}): void {
         if (!res || ! res.value) this.filterWord = null;
         else this.filterWord = res.value;
-        this.setUpDocuments();
+        // this.setUpDocuments();
     }
 
-    private setUpDocuments(): void {
+    private setUpDocuments(allDocuments: Document[]): void {
         if (this.filterWord === null || this.filterWord === '') {
-            this.documents = [...this.allDocuments];
+            this.documents = [...allDocuments];
         }
         else {
-            this.documents = this.allDocuments.filter((doc) => multiWordFilter(this.filterWord.split(' '), doc.originalName.split(' ')));
+            this.documents = allDocuments.filter((doc) => multiWordFilter(this.filterWord.split(' '), doc.originalName.split(' ')));
         }
     }
 }
