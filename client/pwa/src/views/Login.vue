@@ -35,6 +35,22 @@
                </v-flex>
             </v-layout>
          </v-container>
+            <v-snackbar
+               v-model="snackbar"
+            >
+               {{ text }}
+
+               <template v-slot:action="{ attrs }">
+               <v-btn
+                  color="pink"
+                  text
+                  v-bind="attrs"
+                  @click="snackbar = false"
+               >
+                  Fermer
+               </v-btn>
+               </template>
+            </v-snackbar>
       </v-main>
    </v-app>
 </template>
@@ -50,9 +66,13 @@ import authService  from '../services/auth-service';
 export default class Login extends Vue {
     public login = "";
     public password = "";
+    public snackbar = false;
+    public text = "L'authentification a échoué";
 
     public async onLogin(): Promise<void> {
-        await authService.onLogin(this.login, this.password);
+        if (await authService.onLogin(this.login, this.password) === false) {
+           this.snackbar = true;
+        }
     }
 }
 </script>

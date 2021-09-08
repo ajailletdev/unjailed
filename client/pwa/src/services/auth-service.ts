@@ -19,7 +19,7 @@ class AuthService {
     }
 
 
-    public async onLogin(login: string, password: string): Promise<void> {
+    public async onLogin(login: string, password: string): Promise<boolean> {
         try {
             const res = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/auth/login`, {
                 username: login,
@@ -29,11 +29,13 @@ class AuthService {
             localStorage.setItem('login', res.data.user.login);
             await this.setUserToken();
             router.push('/documents');
+            return true;
         }
         catch (err) {
             this.jwtToken = null;
             this.user = null;
             this.emitUser();
+            return false;
         }
         
     }
@@ -47,6 +49,13 @@ class AuthService {
 
     public getJwtToken(): string | null {
         return this.jwtToken;
+    }
+
+    public isLogggedIn(): boolean {
+        if (this.jwtToken) {
+            return true;
+        }
+        else return false;
     }
 
     private async setUserToken () {
