@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AccessRight } from './access_right.entity';
@@ -20,6 +20,7 @@ export class AccessRightService {
             documentId,
             userId
         }});
+        if (!acc) throw new NotFoundException('Access right not found');
         return await this.accessRightsRepository.remove(acc);
     }
 }

@@ -14,6 +14,7 @@ export class Document {
         this.owner = doc.owner;
         this.ownerId = doc.ownerId;
         this.viewers = doc.viewers;
+        if (!this.viewers) this.viewers = [];
       }
     }
   

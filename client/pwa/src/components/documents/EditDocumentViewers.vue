@@ -34,6 +34,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import documentService from "../../services/document-service";
 import userService from "../../services/user-service";
+import authService from "../../services/auth-service";
 import { Document } from "../../entities/document.entity";
 import { User } from "../../entities/user.entity";
 import { Subscription } from "rxjs";
@@ -45,6 +46,8 @@ export default class EditDocumentViewers extends Vue {
   
   public document: Document | null = null;
   public users: User[] = [];
+  private authentificateUser: User | null = null;
+  private authentificateUser$: Subscription;
 
   private document$: Subscription;
   public selected: User[] = [];
@@ -52,9 +55,15 @@ export default class EditDocumentViewers extends Vue {
 
   constructor () {
     super();
+
+    this.authentificateUser$ = authService.userSubject.subscribe((user) => {
+      this.authentificateUser = user;
+    });
+    authService.emitUser();
+
     this.document$ = documentService.currentDocumentSubject.subscribe(async (doc) => {
       this.clearLoginSelected(this.loginSelected);
-      this.users = await userService.getUsers();
+      this.users = (await userService.getUsers()).filter((us) => us.id !== this.authentificateUser?.id);
       this.document = doc;
       if (doc) {
         this.selected = this.users.filter((us) => {
@@ -70,13 +79,13 @@ export default class EditDocumentViewers extends Vue {
     while (this.loginSelected.length > 0) {
         this.loginSelected.pop();
     }
-    this.users = await userService.getUsers();
+    this.users = (await userService.getUsers()).filter((us) => us.id !== this.authentificateUser?.id);
   }
 
   closeDialog(): void {
     this.$emit('close-dialog');
   }
-
+ 
   destroy (): void {
     this.document$.unsubscribe();
   }
