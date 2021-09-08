@@ -4,7 +4,6 @@
 /tmp
 /files
 /config
-/src/config
 
 # Logs
 logs
@@ -39,3 +38,4 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 .env
+/.ssl
