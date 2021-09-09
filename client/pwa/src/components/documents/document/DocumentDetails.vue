@@ -65,13 +65,12 @@
         </v-card-text>
 
         <v-dialog
-          ref="editDocumentViewers"
           width="300"
           v-model="editDocumentViewers"
-          v-on:close-dialog="closeEditViewersDialog"
         >
           <edit-document-viewers
-          v-on:close-dialog="closeEditViewersDialog"/>
+          v-on:close-dialog="closeEditViewersDialog"
+          v-bind:_document="document"/>
         </v-dialog>
 
         <v-card-actions>
@@ -108,24 +107,24 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
-import documentService from "../../services/document-service";
-import dateService from "../../services/date-service";
-import { Document } from "../../entities/document.entity"
-import ConfirmDialog from '../shared/ConfirmDialog.vue';
-import EditDocumentViewers from './EditDocumentViewers.vue';
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import documentService from "../../../services/document-service";
+import dateService from "../../../services/date-service";
+import { Document } from "../../../entities/document.entity"
+import ConfirmDialog from '../../shared/ConfirmDialog.vue';
+import EditDocumentViewers from './document-actions/EditDocumentViewers.vue';
 
 @Component({
   name: 'DocumentDetails',
   components: {
     ConfirmDialog,
     EditDocumentViewers
-  }
+  },
+  props: ['_document']
 })
 export default class DocumentDetails extends Vue {
   
-  public document: Document | null = null;
+  @Prop({required: true}) public _document: Document;
   public editableFilename = "";
   public confirmDialog = false;
   public filenameValid = false;
@@ -136,9 +135,23 @@ export default class DocumentDetails extends Vue {
     (v: any) => !!v || 'Name is required'
   ]
 
-  changingCurrentDoc(): void {
-    this.document = documentService.getCurrentDocument();
-    if (this.document !== null) this.editableFilename = this.document.originalName;
+  constructor () {
+    super();
+    this.editableFilename = this.document.originalName;
+  }
+
+  @Watch('document')
+  private documentChange(): void {
+    this.editableFilename = this.document.originalName;
+  }
+
+  public get document(): Document {
+    return this._document;
+  }
+
+  public set document(doc: Document) {
+    this._document = doc;
+    this.editableFilename = this.document.originalName;
   }
 
   getLocaleDate(date: Date): string {
@@ -150,14 +163,12 @@ export default class DocumentDetails extends Vue {
   }
 
   async saveFilenameDocument(): Promise<void> {
-    if (this.document) {
-      await this.document.changeFilename(this.editableFilename);
-    }
+    await this.document.changeFilename(this.editableFilename);
     this.$emit('close-dialog');
   }
 
   async closeConfirmDialog(res: { valid: boolean }): Promise<void> {
-    if (res.valid && this.document && this.document.id) {
+    if (res.valid) {
       this.confirmDialog = false;
       await documentService.deleteDocument(this.document.id);
       this.closeDialog();

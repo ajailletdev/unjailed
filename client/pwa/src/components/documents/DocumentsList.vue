@@ -49,7 +49,8 @@
     >
         <document-details
         ref="documentDetails"
-         v-on:close-dialog="closeEditDialog"/>
+        v-bind:_document="currentDocument"
+        v-on:close-dialog="closeEditDialog"/>
     </v-dialog>
 
     <v-dialog
@@ -79,12 +80,11 @@
 </template>
 
 <script lang='ts'>
-import Vue from "vue";
-import Component from "vue-class-component";
+import { Component, Vue } from 'vue-property-decorator';
 import documentService from "../../services/document-service";
 import { Document } from "../../entities/document.entity";
 import AddDocumentDialog from './AddDocumentDialog.vue';
-import DocumentDetails from './DocumentDetails.vue';
+import DocumentDetails from './document/DocumentDetails.vue';
 import InputWidget from '../shared/InputWidget.vue';
 import { multiWordFilter } from '../../services/word-service';
 import { Subscription } from "rxjs";
@@ -99,21 +99,20 @@ import { Subscription } from "rxjs";
 })
 export default class DocumentsList extends Vue {
 
-    public allDocuments: Document [] = [];
+    private allDocuments: Document [] = [];
     public documents: Document [] = [];
     public addDialog = false;
     public editDialog = false;
     public currentDocument: Document | null = null;
 
     public filterWord: string | null = null;
-
     private allDocuments$: Subscription;
 
     constructor () {
       super();
         this.allDocuments$ = documentService.documentsSubject.subscribe((docs) => {
             this.allDocuments = docs;
-            this.setUpDocuments(this.allDocuments);
+            this.setUpDocuments();
         });
     }
 
@@ -140,19 +139,9 @@ export default class DocumentsList extends Vue {
 
 
     public openEditDialog(doc: Document): void {
-        if (this.$refs.documentDetails === undefined) { //Tofix
-            this.editDialog = true;
-            setTimeout(() => {
-            this.editDialog = false;
-            this.openEditDialog(doc);
-            }, 100);
-        }
-        else {
-            documentService.setCurrentDocument(doc);
-            this.currentDocument = doc;
-            (this.$refs.documentDetails as DocumentDetails).changingCurrentDoc();
-            this.editDialog = true;
-        }
+        documentService.setCurrentDocument(doc);
+        this.currentDocument = doc;
+        this.editDialog = true;        
     }
 
     public closeEditDialog (): void {  
@@ -160,18 +149,19 @@ export default class DocumentsList extends Vue {
         this.editDialog = false;
     }
 
-    public filterDocuments(res: { value: string}): void {
-        if (!res || ! res.value) this.filterWord = null;
-        else this.filterWord = res.value;
-        // this.setUpDocuments();
+    public filterDocuments = (value: string): void => {
+        if (!value) this.filterWord = null;
+        else this.filterWord = value;
+        this.setUpDocuments();
     }
 
-    private setUpDocuments(allDocuments: Document[]): void {
+    private setUpDocuments = (): void => {
+        this.documents.splice(0, this.documents.length);
         if (this.filterWord === null || this.filterWord === '') {
-            this.documents = [...allDocuments];
+            this.documents.push(...this.allDocuments);
         }
         else {
-            this.documents = allDocuments.filter((doc) => multiWordFilter(this.filterWord.split(' '), doc.originalName.split(' ')));
+            this.documents.push(...this.allDocuments.filter((doc) => multiWordFilter(this.filterWord.split(' '), doc.originalName.split(' '))));
         }
     }
 }
@@ -186,7 +176,7 @@ export default class DocumentsList extends Vue {
     }
 
     .doc-card {
-        width: 170px;
+        width: 150px;
         margin: 5px;
         display: flex;
         flex-direction: column;

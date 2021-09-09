@@ -30,28 +30,34 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
-import documentService from "../../services/document-service";
-import userService from "../../services/user-service";
-import authService from "../../services/auth-service";
-import { Document } from "../../entities/document.entity";
-import { User } from "../../entities/user.entity";
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import documentService from "../../../../services/document-service";
+import authService from "../../../../services/auth-service";
+import userService from "../../../../services/user-service";
+import { Document } from "../../../../entities/document.entity";
+import { User } from "../../../../entities/user.entity";
 import { Subscription } from "rxjs";
 
 @Component({
   name: 'EditDocumentViewers',
+  props: ['_document']
 })
 export default class EditDocumentViewers extends Vue {
-  
-  public document: Document | null = null;
+
+  @Prop({required: true}) private _document: Document;
+
   public users: User[] = [];
   private authentificateUser: User | null = null;
   private authentificateUser$: Subscription;
 
-  private document$: Subscription;
-  public selected: User[] = [];
   public loginSelected: string[] = [];
+
+  public get document(): Document {
+    return this._document;
+  }
+  public set document (doc: Document) {
+    this._document = doc;
+  }
 
   constructor () {
     super();
@@ -60,44 +66,34 @@ export default class EditDocumentViewers extends Vue {
       this.authentificateUser = user;
     });
     authService.emitUser();
+  }
 
-    this.document$ = documentService.currentDocumentSubject.subscribe(async (doc) => {
-      this.clearLoginSelected(this.loginSelected);
-      this.users = (await userService.getUsers()).filter((us) => us.id !== this.authentificateUser?.id);
-      this.document = doc;
-      if (doc) {
-        this.selected = this.users.filter((us) => {
-          return doc.viewers.findIndex((acc) => acc.userId === us.id) > -1
-        });
-        this.loginSelected.push(...this.selected.map((us) => us.login));
-      }
-    });
-    documentService.emitCurrentDocument();
+  @Watch('document')
+  private documentChange(): void {
+    this.setUpSelected();
+  }
+
+  async mounted(): Promise<void> {
+    this.users = (await userService.getUsers()).filter((us) => us.id !== this.authentificateUser?.id);
+    this.setUpSelected();
   }
   
-  async mounted(): Promise<void> {
-    while (this.loginSelected.length > 0) {
-        this.loginSelected.pop();
-    }
-    this.users = (await userService.getUsers()).filter((us) => us.id !== this.authentificateUser?.id);
-  }
 
   closeDialog(): void {
     this.$emit('close-dialog');
   }
  
   destroy (): void {
-    this.document$.unsubscribe();
+    this.authentificateUser$.unsubscribe();
   }
 
   async checkboxChanged(user: User): Promise<void> {
     await documentService.manageCurrentDocumentViewer(user);
   }
 
-  clearLoginSelected (selected: string[]): void {
-    while (selected.length > 0) {
-      selected.pop();
-    }
+  setUpSelected = (): void => {
+    this.loginSelected.splice(0, this.loginSelected.length);
+    this.loginSelected.push(...this.document.viewers.map((acc) => acc.user.login));
   }
 }
 </script>

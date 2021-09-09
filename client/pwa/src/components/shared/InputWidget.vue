@@ -27,9 +27,7 @@ export default class InputWidget extends Vue {
     public searchWord = "";
 
     public inputChange (): void {
-        this.$emit('valueChanged', {
-            value: this.searchWord,
-        });
+        this.$emit('valueChanged', this.searchWord);
     }
 }
 </script>
