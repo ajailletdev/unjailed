@@ -2,56 +2,13 @@
   <div>
   <input-widget v-on:valueChanged="filterDocuments"/>
   <div class="document-list">
-        <v-card class="doc-card"
-            color="indigo darken-4"
-            v-for="doc in documents" v-bind:key="doc.id"
-            elevation="2"
-            >
-            <v-card-subtitle>
-                {{doc.originalName}}
-            </v-card-subtitle>
-            <v-card-text class="doc-card-text">
-                {{doc.size/1000}} Ko
-            </v-card-text>
-            <v-card-text>
-                Accès:
-                <span v-for="acc of doc.viewers" v-bind:key="acc.id">
-                    {{ acc.user.login }}
-                </span>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn
-                icon
-                color="primary"
-                @click="displayDoc(doc)"
-                >
-                    <v-icon dark>
-                        mdi-download
-                    </v-icon>
-                </v-btn>
-                <v-spacer></v-spacer>
-                <v-btn
-                color="primary"
-                icon
-                @click="openEditDialog(doc)"
-                >
-                    <v-icon dark>
-                        mdi-dots-vertical
-                    </v-icon>
-            </v-btn>
-            </v-card-actions>
-        </v-card>
-  </div>
-
-    <v-dialog
-        width="500"
-        v-model="editDialog"
+    <document-widget
+    v-for="doc in documents" v-bind:key="doc.id"
+    v-bind:_document="doc"
+    v-bind:_docUrl="doc"
     >
-        <document-details
-        ref="documentDetails"
-        v-bind:_document="currentDocument"
-        v-on:close-dialog="closeEditDialog"/>
-    </v-dialog>
+    </document-widget>
+  </div>
 
     <v-dialog
         width="500"
@@ -86,6 +43,7 @@ import { Document } from "../../entities/document.entity";
 import AddDocumentDialog from './AddDocumentDialog.vue';
 import DocumentDetails from './document/DocumentDetails.vue';
 import InputWidget from '../shared/InputWidget.vue';
+import DocumentWidget from './document/DocumentWidget.vue';
 import { multiWordFilter } from '../../services/word-service';
 import { Subscription } from "rxjs";
 
@@ -93,7 +51,7 @@ import { Subscription } from "rxjs";
   name: 'DocumentsList',
   components: {
     AddDocumentDialog,
-    DocumentDetails,
+    DocumentWidget,
     InputWidget
   }
 })
@@ -102,8 +60,6 @@ export default class DocumentsList extends Vue {
     private allDocuments: Document [] = [];
     public documents: Document [] = [];
     public addDialog = false;
-    public editDialog = false;
-    public currentDocument: Document | null = null;
 
     public filterWord: string | null = null;
     private allDocuments$: Subscription;
@@ -127,26 +83,6 @@ export default class DocumentsList extends Vue {
     // eslint-disable-next-line 
     public closeAddDialog (): void {    
         this.addDialog = false;
-    }
-
-    public async displayDoc (adocument: Document): Promise<void> {
-        const anchor = document.createElement("a");
-        anchor.download = adocument.originalName;
-        anchor.href = await (new Document(adocument)).getPreviewUrl();
-        anchor.click();
-        anchor.remove();
-    }
-
-
-    public openEditDialog(doc: Document): void {
-        documentService.setCurrentDocument(doc);
-        this.currentDocument = doc;
-        this.editDialog = true;        
-    }
-
-    public closeEditDialog (): void {  
-        documentService.setCurrentDocument(null);
-        this.editDialog = false;
     }
 
     public filterDocuments = (value: string): void => {
@@ -173,16 +109,5 @@ export default class DocumentsList extends Vue {
         padding: 10px;
         flex-wrap: wrap;
         justify-content: space-evenly;
-    }
-
-    .doc-card {
-        width: 150px;
-        margin: 5px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .doc-card-text {
-        margin-top: auto;
     }
 </style>

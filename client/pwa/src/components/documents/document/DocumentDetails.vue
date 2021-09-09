@@ -1,7 +1,7 @@
 <template>
   <v-card>
         <v-card-title class="primary">
-          Modification d'un document
+          Modification
           <v-spacer></v-spacer>
           <v-btn
             color="accent"
