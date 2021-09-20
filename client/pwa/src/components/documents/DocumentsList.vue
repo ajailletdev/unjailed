@@ -41,7 +41,6 @@ import { Component, Vue } from 'vue-property-decorator';
 import documentService from "../../services/document-service";
 import { Document } from "../../entities/document.entity";
 import AddDocumentDialog from './AddDocumentDialog.vue';
-import DocumentDetails from './document/DocumentDetails.vue';
 import InputWidget from '../shared/InputWidget.vue';
 import DocumentWidget from './document/DocumentWidget.vue';
 import { multiWordFilter } from '../../services/word-service';
@@ -59,6 +58,7 @@ export default class DocumentsList extends Vue {
 
     private allDocuments: Document [] = [];
     public documents: Document [] = [];
+    
     public addDialog = false;
 
     public filterWord: string | null = null;

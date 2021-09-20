@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Patch, Post, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { Document } from './document.entity';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -14,6 +14,7 @@ export class DocumentController {
         private readonly documentStorageService: DocumentStorageService,
     ) { }
 
+    @UseGuards(OwnerGuard)
     @Get('preview/:id')
     async seeUploadedFile(@Param('id') id: string, @Res() res) {
       const document = await this.documentService.findOne(id);
@@ -48,6 +49,7 @@ export class DocumentController {
         return await this.documentService.findAll(userId);
     }
 
+    @UseGuards(OwnerGuard)
     @Get(':id')
     public async findOne (@Param('id') id: string): Promise<Document> {
         return await this.documentService.findOne(id);
@@ -69,6 +71,12 @@ export class DocumentController {
     @Patch(':id/removeViewer/:userId')
     async removeViewer(@Param('id') id: string, @Param('userId') userId: string): Promise<Document> {
       return await this.documentService.removeAViewer(id, userId);
+    }
+
+    @Post('get_previews')
+    @UseInterceptors()
+    async getPreviewsFromIds(@Body() ids: string[], @Res() res): Promise<any> {
+        // return await this.documentService.bulkAddFiles(files, ownerId);
     }
 
     @Post('upload/:ownerId')
