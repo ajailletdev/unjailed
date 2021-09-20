@@ -7,12 +7,6 @@
             <v-card-text>
                 <!-- TODO iFRAME -->
                 <!-- <iframe v-bind:src ="docUrl"></iframe> -->
-                <div>
-                    Accès:
-                    <span v-for="acc of document.viewers" v-bind:key="acc.id">
-                        {{ acc.user.login }}
-                    </span>
-                </div>
                 <v-tooltip top>
                     <template v-slot:activator="{ on, attrs }">
                         <div class="doc-card-text"
@@ -23,6 +17,12 @@
                     </template>
                     {{document.originalName}}
                 </v-tooltip>
+                <div>
+                    Accès:
+                    <span v-for="acc of document.viewers" v-bind:key="acc.id">
+                        {{ acc.user.login }}
+                    </span>
+                </div>
             </v-card-text>
             <v-card-actions>
                 <v-btn
