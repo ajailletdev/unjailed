@@ -23,4 +23,12 @@ export class AccessRightService {
         if (!acc) throw new NotFoundException('Access right not found');
         return await this.accessRightsRepository.remove(acc);
     }
+
+    public async removeOneById (accId: string): Promise<AccessRight> {
+        const acc = await this.accessRightsRepository.findOne({ where: {
+            id: accId
+        }});
+        if (!acc) throw new NotFoundException('Access right not found');
+        return await this.accessRightsRepository.remove(acc);
+    }
 }

@@ -55,9 +55,15 @@ export class DocumentService {
 
     public async deleteADocument(id: string): Promise<Document> {
         try {
-            const doc = await this.documentsRepository.findOne(id);
+            const doc = await this.documentsRepository.findOne(id, { relations: ['viewers']});
+            if (doc.viewers) {
+                await Promise.all(doc.viewers.map(async (acc) => {
+                    await this.accessRightService.removeOneById(acc.id);
+                }));
+            }
+            const deleted = await this.documentsRepository.remove(doc);
             await this.documentStorageService.removeFile(doc.id);
-            return await this.documentsRepository.remove(doc);
+            return deleted;
         }
         catch(_) {
             throw _;

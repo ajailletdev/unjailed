@@ -38,6 +38,16 @@
                 <v-btn
                 color="primary"
                 icon
+                @click="openViewDialog()"
+                >
+                    <v-icon dark>
+                        mdi-eye
+                    </v-icon>
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn
+                color="primary"
+                icon
                 @click="openEditDialog()"
                 >
                     <v-icon dark>
@@ -52,9 +62,16 @@
             v-model="editDialog"
         >
             <document-details
-            ref="documentDetails"
             v-bind:_document="document"
             v-on:close-dialog="closeEditDialog"/>
+        </v-dialog>
+
+        <v-dialog
+            v-model="viewDialog"
+        >
+            <document-view
+            v-bind:_document="document"
+            v-on:close-dialog="closeViewDialog"/>
         </v-dialog>
     </div>
 </template>
@@ -65,12 +82,15 @@ import documentService from "../../../services/document-service";
 import { Document } from "../../../entities/document.entity";
 import AddDocumentDialog from '../AddDocumentDialog.vue';
 import DocumentDetails from './DocumentDetails.vue';
+import DocumentView from './DocumentView.vue';
+
 
 @Component({
   name: 'DocumentWidget',
   components: {
     AddDocumentDialog,
     DocumentDetails,
+    DocumentView
   },
   props: [
       '_document',
@@ -83,6 +103,8 @@ export default class DocumentWidget extends Vue {
     @Prop({required: true}) private _docUrl: string;
 
     public editDialog = false;
+    public viewDialog = false;
+
 
     public get docUrl(): string {
         return this._docUrl;
@@ -117,6 +139,16 @@ export default class DocumentWidget extends Vue {
     public closeEditDialog (): void {  
         documentService.setCurrentDocument(null);
         this.editDialog = false;
+    }
+
+    public openViewDialog(): void {
+        documentService.setCurrentDocument(this.document);
+        this.viewDialog = true;        
+    }
+
+    public closeViewDialog (): void {  
+        documentService.setCurrentDocument(null);
+        this.viewDialog = false;
     }
 }
 </script>

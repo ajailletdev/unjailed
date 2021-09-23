@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { promises as fsPromise } from 'fs';
 @Injectable()
@@ -14,12 +14,24 @@ export class DocumentStorageService {
     }
 
     public async getFile(filename: string): Promise<Buffer> {
-        return await fsPromise.readFile(`${this.filePath}/${filename}`);
+        try {
+            return await fsPromise.readFile(`${this.filePath}/${filename}`);
+        }
+        catch (err) {
+            if (err.code === 'ENOENT') {
+                console.log('Document not found in storage, server just delete it.');
+            }
+        }
     }
 
     public async removeFile(filename: string): Promise<void> {
-        return await fsPromise.unlink(`${this.filePath}/${filename}`);
+        try {
+            return await fsPromise.unlink(`${this.filePath}/${filename}`);
+        }
+        catch (err) {
+            if (err.code === 'ENOENT') {
+                console.log('Document not found in storage, server just delete it.');
+            }
+        }
     }
-
-
 }
