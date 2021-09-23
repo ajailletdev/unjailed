@@ -4,7 +4,6 @@ import { DocumentStorageService } from './document-storage.service';
 import { Repository } from 'typeorm';
 import { Document } from './document.entity';
 import { AccessRightService } from 'src/access-right/access-right.service';
-import { AccessRight } from 'src/access-right/access_right.entity';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
