@@ -5,6 +5,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { DocumentStorageService } from './document-storage.service';
 import { PassThrough } from 'stream';
 import { OwnerGuard } from 'src/decorator/owner.guard';
+import { AccessRightGuard } from 'src/decorator/access-right.guard';
 
 @Controller('document')
 export class DocumentController {
@@ -14,7 +15,7 @@ export class DocumentController {
         private readonly documentStorageService: DocumentStorageService,
     ) { }
 
-    @UseGuards(OwnerGuard)
+    @UseGuards(AccessRightGuard)
     @Get('preview/:id')
     async seeUploadedFile(@Param('id') id: string, @Res() res) {
       const document = await this.documentService.findOne(id);
@@ -44,15 +45,26 @@ export class DocumentController {
       readStream.end();
     }
 
-    @Get('/user/:userId')
+    @Get('/user/:userId') //TODO: NE PAS PASSER PAR LES USERID MAIS PAR LE JWT
     public async findAll (@Param('userId') userId: string): Promise<Document[]> {
         return await this.documentService.findAll(userId);
     }
 
-    @UseGuards(OwnerGuard)
+    @Get('shared_with_me/:userId')
+    public async findAllSharedWithMe (@Param('userId') userId: string): Promise<Document[]> {
+        return await this.documentService.findAllSharedWithMe(userId);
+    }
+
+
+    @UseGuards(AccessRightGuard)
     @Get(':id')
     public async findOne (@Param('id') id: string): Promise<Document> {
         return await this.documentService.findOne(id);
+    }
+
+    @Patch(':id/my_access_right/:userId')
+    async removeMyAccessRight(@Param('id') id: string, @Param('userId') userId: string): Promise<void> {
+      return await this.documentService.removeMyAccessRight(id, userId);
     }
 
     @UseGuards(OwnerGuard)

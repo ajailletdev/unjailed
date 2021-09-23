@@ -12,6 +12,9 @@ class DocumentService {
     private documents: Document[] = [];
     public documentsSubject: Subject<Document[]> =  new Subject();
 
+    private documentsSharedWithMe: Document[] = [];
+    public documentsSharedWithMeSubject: Subject<Document[]> =  new Subject();
+
     private currentDocument: Document | null = null;
     public currentDocumentSubject: Subject<Document | null> =  new Subject();
 
@@ -35,6 +38,20 @@ class DocumentService {
     public async initAllDocument () {
         this.documents = await this.findAllDocuments();
         this.emitDocuments();
+    }
+
+    public emitDocumentsSharedWithMe () {
+        this.documentsSharedWithMeSubject.next(this.documentsSharedWithMe);
+    }
+
+    public setAllDocumentsSharedWithMe(docs: Document[]) {
+        this.documentsSharedWithMe = docs;
+        this.emitDocumentsSharedWithMe();
+    } 
+
+    public async initAllDocumentSharedWithMe () {
+        this.documentsSharedWithMe = await this.findAllDocumentsSharedWithMe();
+        this.emitDocumentsSharedWithMe();
     }
 
     public emitCurrentDocument () {
@@ -62,6 +79,17 @@ class DocumentService {
         }
     }
 
+    public async deleteMyAccessRight (id: string, userId: string): Promise<Document | undefined> {
+        try {
+            const res = await axios.patch(`${process.env.VUE_APP_BACKEND_URL}/document/${id}/my_access_right/${userId}`);
+            this.setAllDocumentsSharedWithMe(this.documentsSharedWithMe.filter((doc) => doc.id !== id));
+            return res.data as Document;
+        }
+        catch (_) {
+            console.error(_);
+        }
+    }
+
     public async findAllDocuments (): Promise<Document[]> {
         if (this.user?.id) {
             try {
@@ -75,6 +103,21 @@ class DocumentService {
             }
         } else return [];
     }
+
+    public async findAllDocumentsSharedWithMe (): Promise<Document[]> {
+        if (this.user?.id) {
+            try {
+                const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/document/shared_with_me/${this.user.id}`);
+                return res.data.map((doc: Document) => {
+                    return new Document(doc);
+                });
+            }
+            catch (_) {
+                console.error(_);
+            }
+        } else return [];
+    }
+
 
     public async findOne (docId: string): Promise<Document> {
         try {

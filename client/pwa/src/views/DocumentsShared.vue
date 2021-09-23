@@ -1,19 +1,19 @@
 <template>
   <div class="documents">
-    <documents-list/>
+    <shared-documents-list/>
   </div>
 </template>
 
 <script lang='ts'>
 import Vue from 'vue';
-import DocumentsList from '../components/documents/DocumentsList.vue'
+import SharedDocumentsList from '../components/documents/SharedDocumentsList.vue'
 import Component from "vue-class-component";
 
 
 @Component({
   name: 'Documents',
   components: {
-    DocumentsList
+    SharedDocumentsList
   }
 })
 export default class Documents extends Vue {

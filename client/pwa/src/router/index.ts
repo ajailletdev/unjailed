@@ -25,6 +25,11 @@ const router = new Router({
       component: () => import(/* webpackChunkName: "search" */ '../views/Documents.vue')
     },
     {
+      path: '/shared_with_me',
+      name: 'sharedDocuments',
+      component: () => import(/* webpackChunkName: "search" */ '../views/DocumentsShared.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       meta: {

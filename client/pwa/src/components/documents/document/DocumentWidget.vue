@@ -17,11 +17,14 @@
                     </template>
                     {{document.originalName}}
                 </v-tooltip>
-                <div>
+                <div v-if="isMyDocument()">
                     Accès:
                     <span v-for="acc of document.viewers" v-bind:key="acc.id">
                         {{ acc.user.login }}
                     </span>
+                </div>
+                <div v-if="!isMyDocument()">
+                    Propriétaire: {{document.owner.login}}
                 </div>
             </v-card-text>
             <v-card-actions>
@@ -79,10 +82,13 @@
 <script lang='ts'>
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import documentService from "../../../services/document-service";
+import authService from "../../../services/auth-service";
 import { Document } from "../../../entities/document.entity";
 import AddDocumentDialog from '../AddDocumentDialog.vue';
 import DocumentDetails from './DocumentDetails.vue';
 import DocumentView from './DocumentView.vue';
+import { User } from '../../../entities/user.entity';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -104,7 +110,16 @@ export default class DocumentWidget extends Vue {
 
     public editDialog = false;
     public viewDialog = false;
-
+    private authentificateUser: User | null = null;
+    private authentificateUser$: Subscription;
+    
+    constructor () {
+        super();
+        this.authentificateUser$ = authService.userSubject.subscribe((user) => {
+            this.authentificateUser = user;
+        });
+        authService.emitUser();
+    }
 
     public get docUrl(): string {
         return this._docUrl;
@@ -149,6 +164,14 @@ export default class DocumentWidget extends Vue {
     public closeViewDialog (): void {  
         documentService.setCurrentDocument(null);
         this.viewDialog = false;
+    }
+
+    public isMyDocument(): boolean {
+        return this.document.ownerId === this.authentificateUser.id;
+    }
+
+    destroy (): void {
+        this.authentificateUser$.unsubscribe();
     }
 }
 </script>

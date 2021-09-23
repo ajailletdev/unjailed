@@ -42,6 +42,15 @@ export class DocumentService {
         }
     }
 
+    public async removeMyAccessRight(id: string, userId: string): Promise<void>{
+        try {
+            await this.accessRightService.removeOne(id, userId);
+        }
+        catch(_) {
+            throw _;
+        }
+    }
+
     public async editFilename(id: string, name: string): Promise<Document> {
         try {
             const doc = await this.documentsRepository.findOne(id);
@@ -75,6 +84,17 @@ export class DocumentService {
             .where('doc.ownerId = :userId', { userId })
             .leftJoinAndSelect('doc.viewers', 'acc')
             .leftJoinAndSelect('acc.user', 'user')
+            .getMany();
+
+        return docs;
+    }
+
+    public async findAllSharedWithMe(userId: string): Promise<Document[]> {
+        const docs = await this.documentsRepository.createQueryBuilder('doc')
+            .leftJoinAndSelect('doc.viewers', 'acc')
+            .leftJoinAndSelect('doc.owner', 'owner')
+            .leftJoinAndSelect('acc.user', 'user')
+            .where('user.id = :userId', { userId })
             .getMany();
 
         return docs;
@@ -128,6 +148,22 @@ export class DocumentService {
             const user = await this.userService.findByUserName(login);
             const document = await this.findOne(docId);
             return document.ownerId === user.id;
+        }
+        catch (_) {
+            throw _;
+        }
+    }
+
+
+    public async matchGoodAccessRight(docId: string, login: string): Promise<boolean> {
+        try  {
+            const user = await this.userService.findByUserName(login);
+            const document = await this.findOne(docId);
+            if (document.ownerId === user.id) return true;
+            else {
+                if (document.viewers.findIndex((acc) => acc.userId === user.id) > -1) return true;
+                else return false;
+            }
         }
         catch (_) {
             throw _;

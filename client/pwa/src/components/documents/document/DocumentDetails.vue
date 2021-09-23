@@ -1,7 +1,7 @@
 <template>
   <v-card>
         <v-card-title class="primary">
-          Modification
+          Infos supplémentaires
           <v-spacer></v-spacer>
           <v-btn
             color="accent"
@@ -18,7 +18,7 @@
         <v-divider></v-divider>
 
         <v-card-text v-if="document">
-          <div>
+          <div v-if="isMyDocument()">
           <v-form v-model="filenameValid">
               <v-container>
                 <v-row>
@@ -39,6 +39,9 @@
           </div>
           <div style="display: flex">
             <div style="flex: 1">
+              <div class="no-editable" v-if="!isMyDocument()">
+                Nome: {{document.originalName}}
+              </div>
               <div class="no-editable">
                 Type: {{document.mime}}
               </div>
@@ -49,7 +52,10 @@
                 Date d'import: {{getLocaleDate(document.createdAt)}}
               </div>
             </div>
-            <div style="flex: 1; display: flex; justify-content: flex-end; align-items: flex-end">
+            <div 
+              style="flex-shrink: 0; display: flex; justify-content: flex-end; align-items: flex-end"
+              v-if="isMyDocument()"
+            >
               <v-btn
                 color="primary"
                 fab
@@ -99,6 +105,7 @@
             :disabled="!filenameValid"
             text
             @click="saveFilenameDocument()"
+            v-if="isMyDocument()"
           >
           Valider les changements
           </v-btn>
@@ -110,9 +117,12 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import documentService from "../../../services/document-service";
 import dateService from "../../../services/date-service";
+import authService from "../../../services/auth-service";
 import { Document } from "../../../entities/document.entity"
 import ConfirmDialog from '../../shared/ConfirmDialog.vue';
 import EditDocumentViewers from './document-actions/EditDocumentViewers.vue';
+import { Subscription } from 'rxjs';
+import { User } from '../../../entities/user.entity';
 
 @Component({
   name: 'DocumentDetails',
@@ -135,9 +145,16 @@ export default class DocumentDetails extends Vue {
     (v: any) => !!v || 'Name is required'
   ]
 
+  private authentificateUser: User | null = null;
+  private authentificateUser$: Subscription;
+
   constructor () {
     super();
     this.editableFilename = this.document.originalName;
+    this.authentificateUser$ = authService.userSubject.subscribe((user) => {
+      this.authentificateUser = user;
+    });
+    authService.emitUser();
   }
 
   @Watch('document')
@@ -169,9 +186,16 @@ export default class DocumentDetails extends Vue {
 
   async closeConfirmDialog(res: { valid: boolean }): Promise<void> {
     if (res.valid) {
-      this.confirmDialog = false;
-      await documentService.deleteDocument(this.document.id);
-      this.closeDialog();
+      if (this.isMyDocument()) {
+        this.confirmDialog = false;
+        await documentService.deleteDocument(this.document.id);
+        this.closeDialog();
+      }
+      else {
+        this.confirmDialog = false;
+        await documentService.deleteMyAccessRight(this.document.id, this.authentificateUser.id);
+        this.closeDialog();
+      }
     }
     else this.confirmDialog = false;
   }
@@ -182,6 +206,14 @@ export default class DocumentDetails extends Vue {
 
   openEditViewersDialog(): void {
     this.editDocumentViewers = true;
+  }
+
+  public isMyDocument(): boolean {
+    return this.document.ownerId === this.authentificateUser.id;
+  }
+
+  destroy (): void {
+    this.authentificateUser$.unsubscribe();
   }
 }
 </script>

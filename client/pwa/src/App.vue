@@ -2,7 +2,7 @@
   <v-app>
     <v-app-bar
         color="warn"
-        dark
+        flat
     >
       <p v-if="users[0]">
         Bienvenue {{users[0].login}}
@@ -16,10 +16,10 @@
       </v-btn>
 
       <template v-slot:extension>
-        <v-tabs
-        centered>
+        <v-tabs>
           <v-tab to="/home">Home</v-tab>
-          <v-tab v-if="users[0]" to="/documents">Documents</v-tab>
+          <v-tab v-if="users[0]" to="/documents">Mes Documents</v-tab>
+          <v-tab v-if="users[0]" to="/shared_with_me">Partagés avec moi</v-tab>
         </v-tabs>
       </template>
     </v-app-bar>
@@ -65,5 +65,9 @@ export default class App extends Vue {
 <style scoped>
   .app-bar-title {
     width: 500px;
+  }
+
+  .v-toolbar {
+    flex: 0;
   }
 </style>
