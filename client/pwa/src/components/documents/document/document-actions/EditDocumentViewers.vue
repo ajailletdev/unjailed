@@ -88,7 +88,7 @@ export default class EditDocumentViewers extends Vue {
   }
 
   async checkboxChanged(user: User): Promise<void> {
-    await documentService.manageCurrentDocumentViewer(user);
+    await documentService.manageCurrentDocumentViewer(user, this.document);
   }
 
   setUpSelected = (): void => {

@@ -3,6 +3,7 @@ import axios from 'axios';
 import authService from './auth-service';
 import { User } from '@/entities/user.entity';
 import { Subject } from 'rxjs';
+import { AccessRight } from '@/entities/access_right.entity';
 
 class DocumentService {
 
@@ -112,14 +113,15 @@ class DocumentService {
         }
     }
 
-    public async manageCurrentDocumentViewer (user: User) {
-        const index = this.currentDocument.viewers.findIndex((acc) => {
+    public async manageCurrentDocumentViewer (user: User, doc: Document) {
+        const index = doc.viewers.findIndex((acc) => {
             return acc.userId === user.id
         });
         if (index === -1) {
-            await this.currentDocument.addViewer(user);
+            await doc.addViewer(user);
         }
-        else await this.currentDocument.removeViewer(user);
+        else await doc.removeViewer(user);
+        this.setCurrentDocument(doc);
     }
 }
 
