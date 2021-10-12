@@ -1,0 +1,67 @@
+<template>
+    <v-card>
+            <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-card-title class="doc-card-text"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="changeCurrentFolder()">
+                        {{folder.name}}
+                    </v-card-title>
+                </template>
+                {{folder.name}}
+            </v-tooltip>
+    </v-card>
+</template>
+
+<script lang='ts'>
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Folder } from '../../../entities/folder.entity';
+import folderService from '../../../services/folder-service';
+import router from '../../../router';
+
+@Component({
+  name: 'FolderWidget',
+  props: [
+      '_folder',
+    ]
+})
+export default class FolderWidget extends Vue {
+
+    @Prop({required: true}) public _folder: Folder;
+
+    public get folder(): Folder {
+        return this._folder;
+    }
+
+    public set folder(folder: Folder) {
+        this._folder = folder;
+    }
+
+    public changeCurrentFolder() {
+        let newLocation = '';
+        if (router.currentRoute.query?.location !== undefined) {
+            newLocation = `${router.currentRoute.query?.location}/${this.folder.name}`
+        }
+        else {
+            newLocation = this.folder.name;
+        }
+        router.push({
+            path: '/documents',
+            query: {
+                location: newLocation
+            }
+        });
+    }
+}
+</script>
+
+<style scoped>
+    .doc-card-text {
+        margin-top: auto;
+        white-space:nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+    }   
+</style>

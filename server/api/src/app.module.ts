@@ -14,6 +14,8 @@ import { User } from './user/user.entity';
 import { AccessRightModule } from './access-right/access-right.module';
 import configuration from './config/configuration';
 import { AccessRight } from './access-right/access_right.entity';
+import { FolderModule } from './folder/folder.module';
+import { Folder } from './folder/folder.entity';
 
 
 @Module({
@@ -31,7 +33,7 @@ import { AccessRight } from './access-right/access_right.entity';
         password: configService.get('db.password'),
         database: configService.get('db.database'),
         synchronize: configService.get('db.synchronize'),
-        entities: [Document, User, AccessRight],
+        entities: [Document, User, AccessRight, Folder],
       }),
       inject: [ConfigService],
     }),
@@ -43,6 +45,7 @@ import { AccessRight } from './access-right/access_right.entity';
     UserModule,
     AuthModule,
     AccessRightModule,
+    FolderModule,
   ],
   controllers: [AppController],
   providers: [

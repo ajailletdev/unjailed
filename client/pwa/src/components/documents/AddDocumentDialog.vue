@@ -4,7 +4,7 @@
           Ajout d'un document
         </v-card-title>
 
-        <v-card-text>
+        <v-card-text style="text-align: center">
         <v-file-input
             v-model="files"
             counter
@@ -13,6 +13,26 @@
             truncate-length="15"
             label="Choisir un fichier"
         ></v-file-input>
+        <h3>
+          Ou
+        </h3>
+          <v-dialog
+              width="500"
+              v-model="addFolderDialog"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+              color="primary"
+              v-bind="attrs"
+              v-on="on"
+            >
+              Nouveau dossier
+            </v-btn>
+            </template>
+
+            <add-folder-dialog
+              v-on:close-dialog="closeAddDialog"/>
+          </v-dialog>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -43,12 +63,18 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import documentService from "../../services/document-service";
-
+import AddFolderDialog from "./folder/AddFolderDialog.vue";
 
 @Component({
   name: 'AddDocumentDialog',
+  components: {
+    AddFolderDialog
+  }
 })
 export default class AddDocumentDialog extends Vue {
+
+  addFolderDialog = false;
+
   files = [];
   loading = false;
 
@@ -66,6 +92,11 @@ export default class AddDocumentDialog extends Vue {
       this.files = [];
       this.loading = false;
       this.$emit('close-dialog');
+  }
+
+  closeAddDialog (): void {
+    this.addFolderDialog = false;
+    this.closeDialog();
   }
 }
 </script>

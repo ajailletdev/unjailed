@@ -3,7 +3,6 @@ import axios from 'axios';
 import authService from './auth-service';
 import { User } from '@/entities/user.entity';
 import { Subject } from 'rxjs';
-import { AccessRight } from '@/entities/access_right.entity';
 
 class DocumentService {
 
