@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Document } from './document.entity';
 import { AccessRightService } from 'src/access-right/access-right.service';
 import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class DocumentService {
@@ -16,19 +17,20 @@ export class DocumentService {
         private userService: UserService
     ) { }
 
-    public async bulkAddFiles(docs: Express.Multer.File[], ownerId: string): Promise<Document[]> {
+    public async bulkAddFiles(docs: Express.Multer.File[], user: User ,folderId: string): Promise<Document[]> {
         const documents = [];
         await Promise.all(docs.map(async (doc) => {
-            documents.push(await this.addOne(doc, ownerId));
+            documents.push(await this.addOne(doc, user.id, folderId));
         }));
         return documents;
     }
 
-    public async addOne(doc: Express.Multer.File, ownerId: string): Promise<Document> {
+    public async addOne(doc: Express.Multer.File, ownerId: string, folderId: string): Promise<Document> {
         const document = new Document({
             originalName: doc.originalname,
             mime: doc.mimetype,
             size: doc.size,
+            folderId,
             ownerId
         });
         try {
@@ -78,13 +80,14 @@ export class DocumentService {
         }
     }
 
-    public async findAll(userId: string): Promise<Document[]> {
+    public async findAll(user: User, folderId: string): Promise<Document[]> {
         const docs = await this.documentsRepository.createQueryBuilder('doc')
-            .where('doc.ownerId = :userId', { userId })
+            .where('doc.folderId = :folderId', { folderId })
+            .andWhere('doc.ownerId = :ownerId', { ownerId: user.id })
+            .orderBy('doc.originalName', 'ASC')
             .leftJoinAndSelect('doc.viewers', 'acc')
             .leftJoinAndSelect('acc.user', 'user')
             .getMany();
-
         return docs;
     }
 

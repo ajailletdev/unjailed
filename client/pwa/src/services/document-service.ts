@@ -1,9 +1,10 @@
 import { Document } from '../entities/document.entity';
 import axios from 'axios';
 import authService from './auth-service';
+import folderService from './folder-service';
 import { User } from '@/entities/user.entity';
 import { Subject } from 'rxjs';
-import { AccessRight } from '@/entities/access_right.entity';
+import { Folder } from '@/entities/folder.entity';
 
 class DocumentService {
 
@@ -18,12 +19,19 @@ class DocumentService {
     private currentDocument: Document | null = null;
     public currentDocumentSubject: Subject<Document | null> =  new Subject();
 
+    private currentFolder: Folder | null;
+
     constructor () {
         authService.userSubject.subscribe(async (res) => {
             this.user = res;
             await this.initAllDocument();
         });
         authService.emitUser();
+
+        folderService.currentfolderSubject.subscribe(async (folder) => {
+            this.currentFolder = folder;
+            this.initAllDocument();
+        });
     }
 
     public emitDocuments () {
@@ -91,9 +99,9 @@ class DocumentService {
     }
 
     public async findAllDocuments (): Promise<Document[]> {
-        if (this.user?.id) {
+        if (this.currentFolder?.id) {
             try {
-                const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/document/user/${this.user.id}`);
+                const res = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/document/folderId/${this.currentFolder.id}`);
                 return res.data.map((doc: Document) => {
                     return new Document(doc);
                 });
@@ -138,7 +146,7 @@ class DocumentService {
                     formData.append('file', doc);
                 });
     
-                const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/document/upload/${this.user.id}`,
+                const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/document/upload/${this.currentFolder.id}`,
                     formData
                 );
                 

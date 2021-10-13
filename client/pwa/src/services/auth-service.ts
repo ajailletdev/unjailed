@@ -2,6 +2,7 @@ import { User } from '@/entities/user.entity';
 import router from '@/router';
 import axios from 'axios';
 import { Subject } from 'rxjs';
+import folderService from './folder-service';
 
 
 class AuthService {
@@ -28,6 +29,7 @@ class AuthService {
             localStorage.setItem('jwtToken', res.data.access_token);
             localStorage.setItem('login', res.data.user.login);
             await this.setUserToken();
+            await folderService.initializeCurrentFolder();
             router.push('/documents');
             return true;
         }
