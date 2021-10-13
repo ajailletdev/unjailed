@@ -45,7 +45,7 @@ export class Document {
   folder?: Folder;
 
   @Column()
-  folderId?: string;
+  folderId: string;
 
   @OneToMany(type => AccessRight, (acc) => acc.document)
   viewers?: AccessRight[];

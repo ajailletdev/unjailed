@@ -1,17 +1,22 @@
 <template>
-    <v-card>
+    <v-card style="width: 200px; margin: 10px; cursor: pointer" color="secondary" @click="changeCurrentFolder()">
+        <v-card-title style="justify-content: space-between; flex-wrap: nowrap">
+            <v-icon style="margin-right: 10px">
+                mdi-folder
+            </v-icon>
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                    <v-card-title class="doc-card-text"
+                    <div class="doc-card-text"
                     v-bind="attrs"
-                    v-on="on"
-                    @click="changeCurrentFolder()">
+                    v-on="on">
                         {{folder.name}}
-                    </v-card-title>
+                    </div>
                 </template>
                 {{folder.name}}
             </v-tooltip>
+        </v-card-title>
     </v-card>
+    
 </template>
 
 <script lang='ts'>
@@ -41,7 +46,7 @@ export default class FolderWidget extends Vue {
     public changeCurrentFolder() {
         let newLocation = '';
         if (router.currentRoute.query?.location !== undefined) {
-            newLocation = `${router.currentRoute.query?.location}/${this.folder.name}`
+            newLocation = `${router.currentRoute.query?.location};${this.folder.name}`
         }
         else {
             newLocation = this.folder.name;
@@ -62,6 +67,5 @@ export default class FolderWidget extends Vue {
         white-space:nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        cursor: pointer;
     }   
 </style>

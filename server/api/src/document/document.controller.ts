@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UploadedFiles, UseGuards, UseInterceptors, Request } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { Document } from './document.entity';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -6,6 +6,7 @@ import { DocumentStorageService } from './document-storage.service';
 import { PassThrough } from 'stream';
 import { OwnerGuard } from 'src/decorator/owner.guard';
 import { AccessRightGuard } from 'src/decorator/access-right.guard';
+import { UserService } from 'src/user/user.service';
 
 @Controller('document')
 export class DocumentController {
@@ -13,6 +14,7 @@ export class DocumentController {
     constructor(
         private readonly documentService: DocumentService,
         private readonly documentStorageService: DocumentStorageService,
+        private readonly userService: UserService
     ) { }
 
     @UseGuards(AccessRightGuard)
@@ -45,9 +47,10 @@ export class DocumentController {
       readStream.end();
     }
 
-    @Get('/user/:userId') //TODO: NE PAS PASSER PAR LES USERID MAIS PAR LE JWT
-    public async findAll (@Param('userId') userId: string): Promise<Document[]> {
-        return await this.documentService.findAll(userId);
+    @Get('/folderId/:folderId') //TODO: Demander à la kok si c'est safe
+    public async findAll (@Param('folderId') folderId: string, @Request() req): Promise<Document[]> {
+      const user = await this.userService.findByUserName(req.user.login);
+      return await this.documentService.findAll(user, folderId);
     }
 
     @Get('shared_with_me/:userId')
@@ -91,10 +94,11 @@ export class DocumentController {
         // return await this.documentService.bulkAddFiles(files, ownerId);
     }
 
-    @Post('upload/:ownerId')
+    @Post('upload/:folderId')
     @UseInterceptors(FilesInterceptor('file', 50))
-    async uploadFile(@UploadedFiles() files: Express.Multer.File[], @Param('ownerId') ownerId: string): Promise<Document[]> {
-        return await this.documentService.bulkAddFiles(files, ownerId);
+    async uploadFile(@UploadedFiles() files: Express.Multer.File[], @Param('folderId') folderId: string, @Request() req): Promise<Document[]> {
+      const user = await this.userService.findByUserName(req.user.login);
+      return await this.documentService.bulkAddFiles(files, user ,folderId);
     }
     
     @UseGuards(OwnerGuard)

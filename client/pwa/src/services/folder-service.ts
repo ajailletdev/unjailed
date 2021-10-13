@@ -74,6 +74,14 @@ class FolderService {
             console.error(_);
         }
     }
+
+    public async deleteCurrentFolder (): Promise<void> {
+        if (this._currentFolder) {
+            await axios.delete(`${API_PATH}/folder/${this._currentFolder.id}`);
+        } else {    
+            console.error("No current document");
+        }
+    }
 }
 
 export default new FolderService();

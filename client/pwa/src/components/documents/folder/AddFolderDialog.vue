@@ -5,7 +5,10 @@
         </v-card-title>
 
         <v-card-text style="text-align: center">
-              <input-widget v-on:valueChanged="inputValueChanged"/>
+              <input-widget 
+              v-bind:_label="'Nom du dossier'"
+              v-on:valueChanged="inputValueChanged"
+              />
         </v-card-text>
 
         <v-divider></v-divider>

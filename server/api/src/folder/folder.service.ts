@@ -64,9 +64,13 @@ export class FolderService {
                 throw new BadRequestException("User unauthorized");
             }
 
-            return await this.folderRepository.find({ where: {
+            return await this.folderRepository.find({ 
+            where: {
                 parentFolderId,
-                id: Not(parentFolderId)
+                id: Not(parentFolderId),
+            },
+            order: {
+                name: "ASC"
             }});
 
         } catch(_) {
@@ -75,21 +79,18 @@ export class FolderService {
     }
 
     public async findCurrentfromLocation(location: string, user: User): Promise<Folder> {
-        console.log(location);
         try {
             let lastFolder = await this.folderRepository.findOne({ where: {
                 name: '/',
                 userId: user.id
             }});
-            console.log("init", lastFolder);
 
-            const splitLocation = location.split('/');
-            for (const loc in splitLocation) {
+            const splitLocation = location.split(';');
+            for (const loc of splitLocation) {
                 lastFolder = await this.folderRepository.findOne({ where: {
                     name: loc,
                     parentFolderId: lastFolder.id
-                }}); //TOFIX
-                console.log("again", lastFolder);
+                }});
             }
 
             return lastFolder;
@@ -98,4 +99,25 @@ export class FolderService {
         }
     }
 
+    public async removeOne(folderId: string, user: User): Promise<Folder> {
+        try {
+            const folder = await this.folderRepository.findOne({where: {id: folderId}, relations: ["childFolders"]});
+            if (folder.userId !== user.id) {
+                throw new BadRequestException("User not allowed to delete this one");
+            }
+
+            if (folder.childFolders.length > 0) {
+                throw new BadRequestException("There are documents in this folder");
+            }
+
+            if (folder.name === "/") {
+                throw new BadRequestException("Can't delete /");
+            }
+
+            return await this.folderRepository.remove(folder);
+        }
+        catch(_) {
+            throw _;
+        }
+    }
 }

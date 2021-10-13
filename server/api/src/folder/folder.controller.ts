@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Request } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Request } from '@nestjs/common';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Folder } from './folder.entity';
@@ -35,5 +35,11 @@ export class FolderController {
     async uploadFile(@Body() folder: { name: string, currentFolder: string }, @Request() req): Promise<Folder> {
         const user = await this.userService.findByUserName(req.user.login);
         return await this.folderService.addOne(folder.name, folder.currentFolder, user);
+    }
+
+    @Delete(':id')
+    async remove(@Param('id') id: string, @Request() req): Promise<Folder> {
+        const user = await this.userService.findByUserName(req.user.login);
+        return await this.folderService.removeOne(id, user);
     }
 }
