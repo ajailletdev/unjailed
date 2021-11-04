@@ -1,10 +1,18 @@
 <template>
     <div v-if="watchDocument" class="document-frame">
-        <iframe v-bind:src ="docUrl" style="width: 90%; height: 100%"></iframe>
+        <iframe
+          class="doc-view-frame"
+          v-bind:src ="docUrl" 
+          v-if="document.mime === 'application/pdf'"
+        ></iframe>
+        <img 
+        class="doc-view-frame"
+        v-if="document.mime !== 'application/pdf'"
+        v-bind:src="docUrl">
         <v-btn
             color="accent"
             @click="closeDialog()"
-            style="width: 90%"
+            class="doc-view-button"
           >
           Fermer
           </v-btn>
@@ -73,5 +81,14 @@ export default class DocumentView extends Vue {
     display: flex;
     flex-direction: column;
     justify-content: center;
+  }
+
+  .doc-view-frame{
+    width: 90%;
+    height: 100%;
+  }
+
+  .doc-view-button {
+    width: 90%;
   }
 </style>
