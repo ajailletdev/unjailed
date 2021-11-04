@@ -21,7 +21,7 @@
 
 <script lang='ts'>
 import { Subscription } from 'rxjs';
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Document } from "../../../entities/document.entity";
 
 @Component({
