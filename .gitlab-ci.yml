@@ -1,0 +1,18 @@
+stages:
+  - deploy_staging
+
+
+deploy_staging:
+  # variables:
+  #   CI_DEBUG_TRACE: "true"
+  stage: deploy_staging
+  environment: staging
+  script:
+    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$STAGING_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh root@51.210.101.215 -p 49687 -t -t -o StrictHostKeyChecking=no "cd <project-repository> && git checkout staging && git pull && exit"
+  only:
+    - staging
