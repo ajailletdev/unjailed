@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  client:
+    container_name: unjailed-client
+    image: node:16
+    ports:
+      - "8080:8080" # Map the container's port 3000 to the host's port 3000
+    volumes:
+      - .:/usr/src/app # Sync local files with the container (optional for development)
+    environment:
+      - VUE_APP_BACKEND_URL=http://localhost:3000
+    tty: true
+    command: yarn --cwd /usr/src/app/client/pwa run serve   # Keeps the container running indefinitely
+    # command: bash
+
+  app:
+    container_name: unjailed-api
+    image: node:16-alpine
+    ports:
+      - "3000:3000" # Map the container's port 3000 to the host's port 3000
+    volumes:
+      - .:/usr/src/app # Sync local files with the container (optional for development)
+    tty: true
+    environment: 
+      - CONFIG_PATH=/usr/src/app/server/api/config.yaml
+    command: yarn --cwd /usr/src/app/server/api start
+    # command: sh
+    restart: always              # Restart automatically if the container stops
+
+    depends_on:
+      - db                       # Ensure the database starts before the app
+
+  db:
+    container_name: unjailed-db
+    image: mysql:8.0
+    ports:
+      - "3306:3306" # Map MySQL's default port
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: my_password
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    restart: always              # Restart automatically if the container stops
+

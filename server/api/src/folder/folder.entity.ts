@@ -24,7 +24,7 @@ export class Folder {
   @JoinColumn({ name: "parentFolderId" })
   parentFolder?: Folder;
 
-  @Column()
+  @Column({ nullable: true })
   parentFolderId?: string;
 
   @ManyToOne(type => User, user => user.sharedWithMe)

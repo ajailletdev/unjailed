@@ -1,0 +1,14 @@
+auth:
+  secret: 'toto'
+  jwtExpire: '2 days'
+
+db:
+  host: 'db'
+  port: 3306
+  username: 'my_user'
+  password: 'my_password'
+  database: 'my_database'
+  synchronize: true
+
+documents:
+  filePath: './docs'
